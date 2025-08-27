@@ -1,3 +1,24 @@
+<?php
+include("Header.html");
+?>
+
+
+
+<?php 
+
+$pdo = new PDO("mysql:host=localhost;port=3307;dbname=gymnastics_db",username: "root", password: "528_hloni");
+
+
+
+// fetch programs
+$sql = "SELECT program_id, program_name FROM programs";
+$result = $pdo->query($sql);
+?>
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +27,10 @@
     <title>Document</title>
 </head>
 <body>
+   
+
+
+
     <h1>Enrol Gymnasts</h1>
     <br>
     <br>
@@ -26,6 +51,7 @@
                     <td><label for="experience">Experience Level:</label></td>
                     <td>
                         <select name="experience">
+                            <option value="Select">Select</option>
                             <option value="Beginner">Beginner</option>
                             <option value="Intermediate">Intermediate</option>
                             <option value="Advanced">Advanced</option>
@@ -35,7 +61,14 @@
                  <tr>
                     <td><label for="program">Program:</label></td>
                     <td>
-                        <select name="program">
+                        <select name="program_id">
+                            <option value="">Select</option>
+                            <?php
+                            foreach ($result as $row) {
+                                echo "<option value='" . $row['program_id'] . "'>" . htmlentities($row['program_name']) . "</option>";
+                                
+                                }
+                            ?>
                            
                         </select>
                     </td>
@@ -63,3 +96,37 @@
 
 </body>
 </html>
+
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+
+    $name = htmlentities(trim($_POST['name'] ?? ''));
+    $age = filter_input(INPUT_POST, 'age', FILTER_VALIDATE_INT);
+    $experience = htmlentities(trim($_POST['experience'] ?? ''));
+    $program_id = filter_input(INPUT_POST,'program_id',FILTER_VALIDATE_INT);
+
+
+
+if($action === 'Submit' && $name && $age && $experience && $experience !== 'Select' && $program_id && $program_id !== null){
+    $stmt = $pdo->prepare("INSERT INTO gymnasts (name, age, experience_level, program_id) VALUES (?,?,?,?)");
+    $stmt->execute([$name, $age, $experience, $program_id]);
+    echo "Gymnast enrolled successfully!";
+
+    } else {
+        echo "⚠️ Please fill all fields correctly!";
+    }
+    
+    
+
+}
+
+
+
+
+
+
+
+?>
+
+
